@@ -224,7 +224,6 @@ void clearCube() {
 void renderCube() {
   for (uint8_t i = 0; i < 8; i++) {
     digitalWrite(SS, LOW);
-
     SPI.transfer(0x01 << i);
     for (uint8_t j = 0; j < 8; j++) {
       SPI.transfer(cube[i][j]);
@@ -737,7 +736,7 @@ void setup() {
 
   digitalWrite(poPress, HIGH);
 
-  Timer1.initialize(300); // 520 is the most ideal value as refresh rate! 550 will be really fast but can be acceptable for the game. 515 is really slow
+  Timer1.initialize(250); // 520 is the most ideal value as refresh rate! 550 will be really fast but can be acceptable for the game. 515 is really slow
   Timer1.attachInterrupt(renderCube);
 
   dir = STOP;
@@ -1008,191 +1007,46 @@ void start_animation() {
 ///////////////////////////////// /////////////////////////////////
 ///////////////////////////////// MAIN LOOP! /////////////////////////////////
 ///////////////////////////////// /////////////////////////////////
-int refrsh_time = 400;
+int refrsh_time = 350;
+bool snake = false;
+bool pong = false;
+
 
 void loop() {
   //  readInputs();
   int initTime, currentTime;
   int delay_time = 100;
-//  gameOver = false;
+  //  gameOver = false;
   initTime = millis();
+//
+//  while (currentTime - initTime < 5000) {
+//    text("0123456789", 10);
+//    currentTime = millis();
+//    delay(delay_time);
+//    delay_time -= 1;
+//    Serial.println("Game to be Started");
+//  }
+//  initTime = millis();
 
-  while (currentTime - initTime < 5000) {
-    text("0123456789", 10);
-
-    currentTime = millis();
-    delay(delay_time);
-    delay_time -= 1;
-    //    Serial.println("Game to be Started");
-  }
-  initTime = millis();
-  //  for (int i = 0; i < 20000; i++) {
-  //    rain();
-  //    renderCube();
-  //    Serial.print("Rain start");
-  //  }
-//  clearCube();
-//  renderCube();
-
+  
   while (!gameOver) {
 
     input();
-
     currentTime = millis();
     if (currentTime - initTime > refrsh_time) {
       logic();
       draw();
       initTime = millis();
     }
-    Serial.println("Refreshes just now");
     // else : do nothing and loop the while loop again for user inputs and logic
   }
-  while (currentTime - initTime < 1000) {
-    rain();
-    currentTime = millis();
-    delay(0.9);
-    //    Serial.println("Game to be Started");
-  }
-  initTime = millis();
-
+//  initTime = millis();
+//  while (currentTime - initTime < 5000) {
+//    rain();
+//    currentTime = millis();
+//    delay(0.6);
+//    Serial.println("Game Over!");
+//  }
+//  initTime = millis();
+//  gameOver = false;
 }
-
-
-
-
-
-///////////////////////////////// PONG GAME /////////////////////////////////
-
-enum eDir { // 1 stop state and 10 additional possible directions (5 on each side)
-  pSTOP = 0,
-  pUP = 1,
-  pUPLEFT = 2,
-  pUPRIGHT = 3,
-  pUPIN = 4,
-  pUPOUT = 5,
-  pDOWN = 6,
-  pDOWNLEFT = 7,
-  pDOWNRIGHT = 8,
-  pDOWNIN = 9,
-  pDOWNOUT = 10
-};
-
-
-
-
-
-class cBall {
-  private:
-    int ballX, ballY, ballZ;
-    int originalX, originalY, originalZ;
-    eDir direction;
-
-  public:
-    cBall(int posX, int posY, int posZ) {
-      originalX = posX;
-      originalY = posY;
-      originalZ = posZ;
-      ballX = posX;
-      ballY = posY;
-      ballZ = posZ;
-      direction = pSTOP;
-    }
-
-    void reset() {
-      ballX = originalX;
-      ballY = originalY;
-      ballZ = originalZ;
-      direction = pSTOP;
-    }
-
-    void changeDirection(eDir d) {
-      direction = d;
-    }
-
-    inline int getX() {
-      return ballX;
-    }
-
-    inline int getY() {
-      return ballY;
-    }
-
-    inline int getZ() {
-      return ballZ;
-    }
-
-    inline eDir getDirection() {
-      return direction;
-    }
-    void randomDirection() {
-      direction = (eDir)(random(1, 11)); // randomly select a direction to move to from 1-10
-    }
-
-    void Move() {
-      switch (direction) {
-        case pSTOP:
-          break;
-
-        case pUP:
-          ballZ ++;
-          break;
-
-        case pUPLEFT:
-          ballZ ++;
-          ballX --;
-          break;
-
-        case pUPRIGHT:
-          ballZ ++;
-          ballX ++;
-          break;
-
-
-        case pUPIN:
-          ballZ ++;
-          ballY ++;
-          break;
-
-        case pUPOUT:
-          ballZ ++;
-          ballY --;
-          break;
-
-        case pDOWN:
-          ballZ --;
-          break;
-
-        case pDOWNLEFT:
-          ballZ --;
-          ballX --;
-          break;
-
-        case pDOWNRIGHT:
-          ballZ --;
-          ballX ++;
-          break;
-
-        case pDOWNIN:
-          ballZ --;
-          ballY ++;
-          break;
-
-        case pDOWNOUT:
-          ballZ --;
-          ballY --;
-          break;
-
-        default:
-          break;
-      }
-    }
-
-};
-
-
-
-
-
-////////////////////////////////////////////////////
-/////////////PONG GAME SETUP //////////////////////
-////////////////////////////////////////////////////
